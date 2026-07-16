@@ -133,7 +133,8 @@ class VoxelCompilerTest {
                 TestSupport.visualReviewDisabled(),
                 RequestClassification.VOLUMETRIC,
                 "positive Z",
-                "1.21.11");
+                "1.21.11",
+                false);
 
         BuildProgram tooLarge = program(List.of(), List.of(),
                 List.of(new BoxOperation(OperationMode.ADD, "1", new IntVec3(0, 0, 0), new IntVec3(2, 1, 1), false, 1)));
@@ -206,6 +207,22 @@ class VoxelCompilerTest {
         assertFalse(result.compiledBuild().voxelModel().contains(new IntVec3(1, 0, 0)));
         assertEquals("2", result.compiledBuild().voxelModel().get(new IntVec3(1, 1, 0)).id());
         assertTrue(result.compiledBuild().validationResult().metrics().exactPlacementCount() >= 4);
+    }
+
+    @Test
+    void canIgnoreOutOfBoundsPlacementsWhenConfigured() {
+        BuildProgram partiallyOutOfBounds = program(
+                List.of(),
+                List.of(),
+                List.of(new RawCuboidOperation(OperationMode.ADD, "1", new IntVec3(2, 2, 2), new IntVec3(4, 4, 4)))
+        );
+
+        CompileResult result = compiler.compile(partiallyOutOfBounds, TestSupport.context(4, 4, 4, true), TestSupport.paletteResolver());
+
+        assertTrue(result.isSuccess());
+        assertTrue(result.compiledBuild().voxelModel().contains(new IntVec3(2, 2, 2)));
+        assertTrue(result.compiledBuild().voxelModel().contains(new IntVec3(3, 3, 3)));
+        assertFalse(result.compiledBuild().voxelModel().contains(new IntVec3(4, 4, 4)));
     }
 
     private BuildProgram program(List<ComponentDefinition> components, List<ComponentInstance> instances, List<PrimitiveOperation> operations) {

@@ -150,7 +150,7 @@ class BuildValidatorAndPipelineTest {
         );
         GenerationContext context = new GenerationContext(new BuildVolume(16, 8, 16), TestSupport.limits(),
                 new VisualReviewSettings(true, 250, 128, false, ""),
-                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11");
+                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11", false);
 
         PipelineResult result = pipeline.generate(TestSupport.pipelineRequest(context, false, 1, 1, "compact house"));
 
@@ -169,7 +169,7 @@ class BuildValidatorAndPipelineTest {
                 """;
         GenerationContext context = new GenerationContext(new BuildVolume(4, 4, 4), TestSupport.limits(),
                 new VisualReviewSettings(true, 1, 128, false, ""),
-                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11");
+                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11", false);
         CompiledBuildGenerationPipeline pipeline = new CompiledBuildGenerationPipeline(
                 new TestSupport.SequenceAiClient(List.of(AiResponse.success(invalid, invalid), AiResponse.success(repaired, repaired))),
                 new BuildProgramParser(),
@@ -232,7 +232,7 @@ class BuildValidatorAndPipelineTest {
         );
         GenerationContext context = new GenerationContext(new BuildVolume(4, 4, 4), TestSupport.limits(),
                 new VisualReviewSettings(true, 1, 128, false, ""),
-                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11");
+                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11", false);
 
         PipelineResult result = pipeline.generate(TestSupport.pipelineRequest(context, false, 1, 1, "render"));
 
@@ -292,7 +292,7 @@ class BuildValidatorAndPipelineTest {
         );
         GenerationContext context = new GenerationContext(new BuildVolume(10, 10, 10), TestSupport.limits(),
                 new VisualReviewSettings(true, 1, 128, false, ""),
-                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11");
+                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11", false);
         PipelineRequest request = new PipelineRequest(
                 TestSupport.preset(),
                 context,
@@ -346,7 +346,7 @@ class BuildValidatorAndPipelineTest {
         );
         GenerationContext context = new GenerationContext(new BuildVolume(4, 4, 1), TestSupport.limits(),
                 TestSupport.visualReviewDisabled(),
-                RequestClassification.FLAT_ART, "positive Z", "1.21.11");
+                RequestClassification.FLAT_ART, "positive Z", "1.21.11", false);
         PipelineRequest request = new PipelineRequest(
                 TestSupport.preset(),
                 context,

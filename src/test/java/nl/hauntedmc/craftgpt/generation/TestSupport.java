@@ -26,8 +26,12 @@ public final class TestSupport {
     }
 
     public static GenerationContext context(int width, int height, int depth) {
+        return context(width, height, depth, false);
+    }
+
+    public static GenerationContext context(int width, int height, int depth, boolean ignoreOutOfBoundsPlacements) {
         return new GenerationContext(new BuildVolume(width, height, depth), limits(), visualReviewDisabled(),
-                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11");
+                RequestClassification.VOLUMETRIC, "positive Z", "1.21.11", ignoreOutOfBoundsPlacements);
     }
 
     public static PaletteResolver paletteResolver() {

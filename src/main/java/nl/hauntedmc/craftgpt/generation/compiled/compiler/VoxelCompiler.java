@@ -148,6 +148,9 @@ public final class VoxelCompiler {
                     throw new CompileRuntimeException(new CompileException("numeric_overflow", "Numeric overflow while transforming component coordinates.", true));
                 }
                 if (!volume.contains(transformedPoint)) {
+                    if (context.ignoreOutOfBoundsPlacements()) {
+                        return;
+                    }
                     throw new CompileRuntimeException(new CompileException("coordinate_outside_selection",
                             "Generated coordinate [%d,%d,%d] is outside local bounds X: 0..%d, Y: 0..%d, Z: 0..%d. All coordinates and inclusive endpoints must stay inside those ranges."
                                     .formatted(

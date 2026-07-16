@@ -27,6 +27,7 @@ public final class PluginConfig {
     private final int maxGenerationAttempts;
     private final int maxRepairAttempts;
     private final boolean applyBestEffortResult;
+    private final boolean ignoreOutOfBoundsPlacements;
     private final boolean repairWarningsEnabled;
     private final boolean visualReviewRepairEnabled;
     private final VisualReviewSettings visualReviewSettings;
@@ -46,6 +47,7 @@ public final class PluginConfig {
                          int maxGenerationAttempts,
                          int maxRepairAttempts,
                          boolean applyBestEffortResult,
+                         boolean ignoreOutOfBoundsPlacements,
                          boolean repairWarningsEnabled,
                          boolean visualReviewRepairEnabled,
                          VisualReviewSettings visualReviewSettings,
@@ -64,6 +66,7 @@ public final class PluginConfig {
         this.maxGenerationAttempts = maxGenerationAttempts;
         this.maxRepairAttempts = maxRepairAttempts;
         this.applyBestEffortResult = applyBestEffortResult;
+        this.ignoreOutOfBoundsPlacements = ignoreOutOfBoundsPlacements;
         this.repairWarningsEnabled = repairWarningsEnabled;
         this.visualReviewRepairEnabled = visualReviewRepairEnabled;
         this.visualReviewSettings = visualReviewSettings;
@@ -95,6 +98,7 @@ public final class PluginConfig {
         int maxGenerationAttempts = getInt(config, "max_generation_attempts", 2, 1, 10);
         int maxRepairAttempts = getInt(config, "max_repair_attempts", 1, 0, 10);
         boolean applyBestEffortResult = config.getBoolean("apply_best_effort_result", false);
+        boolean ignoreOutOfBoundsPlacements = config.getBoolean("ignore_out_of_bounds_placements", false);
         boolean repairWarningsEnabled = config.getBoolean("repair_warnings_enabled", true);
         boolean visualReviewRepairEnabled = config.getBoolean("visual_review_repair_enabled", false);
         VisualReviewSettings visualReviewSettings = new VisualReviewSettings(
@@ -123,6 +127,7 @@ public final class PluginConfig {
                 maxGenerationAttempts,
                 maxRepairAttempts,
                 applyBestEffortResult,
+                ignoreOutOfBoundsPlacements,
                 repairWarningsEnabled,
                 visualReviewRepairEnabled,
                 visualReviewSettings,
@@ -271,6 +276,10 @@ public final class PluginConfig {
 
     public boolean isApplyBestEffortResult() {
         return applyBestEffortResult;
+    }
+
+    public boolean isIgnoreOutOfBoundsPlacements() {
+        return ignoreOutOfBoundsPlacements;
     }
 
     public boolean isRepairWarningsEnabled() {

@@ -76,7 +76,8 @@ public final class GenerationCoordinator implements Listener {
                 config.visualReviewSettings(),
                 RequestClassifier.classify(input),
                 FRONT_DIRECTION,
-                plugin.getServer().getMinecraftVersion()
+                plugin.getServer().getMinecraftVersion(),
+                config.isIgnoreOutOfBoundsPlacements()
         );
         Map<String, String> promptVariables = PromptTemplateResolver.variables(
                 buildVolume,

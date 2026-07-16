@@ -8,7 +8,8 @@ public record GenerationContext(
         VisualReviewSettings visualReviewSettings,
         RequestClassification classification,
         String frontDirection,
-        String minecraftVersion
+        String minecraftVersion,
+        boolean ignoreOutOfBoundsPlacements
 ) {
     public GenerationContext {
         Objects.requireNonNull(buildVolume, "buildVolume");

@@ -75,6 +75,10 @@ visual_review_preview_size: 512
 # If the first compiled result is valid but the repair request fails, allow that first valid result to be applied.
 apply_best_effort_result: false
 
+# When enabled, generated coordinates outside the current WorldEdit selection are ignored instead of failing compilation.
+# Blocks outside the selection are dropped and never placed.
+ignore_out_of_bounds_placements: false
+
 # Request a repair pass for already-valid builds when validator warnings indicate poor structure or detail.
 # This does not require preview rendering unless visual_review_repair_enabled is also true.
 repair_warnings_enabled: true
