@@ -1,0 +1,285 @@
+config_version: 3
+
+# Controls how many particles per block are shown for a selection/while generating.
+particles_per_block: 5
+
+# How often the selection box particle effect updates, in ticks.
+selection_box_update_ticks: 3
+
+# Delay in ticks between each WorldEdit build batch.
+build_delay: 0
+
+# Maximum number of cuboid operations applied in one WorldEdit batch.
+worldedit_batch_size: 4096
+
+# How often the action bar progress text updates, in ticks.
+actionbar_update_ticks: 10
+
+# Timeout in seconds for outbound AI API requests.
+request_timeout_seconds: 300
+
+# Maximum number of characters written into chat or logs when large payloads or responses are echoed.
+log_excerpt_max_length: 1800
+
+# Sends the formatted answer from the AI to chat.
+sendresponse: false
+
+# Sends the payload provided to the endpoint back to the player.
+sendpayload: false
+
+# Build generation architecture:
+# semantic plan -> Build Program DSL v2 -> Java compiler -> preview critique/refinement -> Java sparse compression
+
+# Quality workflow profile for the compiled pipeline.
+#   fast            - direct authoring only unless warning/visual repair flags force one refinement pass
+#   balanced        - semantic planning plus one critique/refinement pass
+#   maximum_quality - semantic planning plus up to two critique/refinement passes and extended previews
+workflow_profile: balanced
+
+workflow_profiles:
+  fast:
+    planning_enabled: false
+    critique_enabled: false
+    max_refinement_passes: 0
+    extended_previews: false
+  balanced:
+    planning_enabled: true
+    critique_enabled: true
+    max_refinement_passes: 1
+    extended_previews: false
+  maximum_quality:
+    planning_enabled: true
+    critique_enabled: true
+    max_refinement_passes: 2
+    extended_previews: true
+
+max_dsl_components: 256
+# Counts expanded placements after compact repeated-instance expansion.
+max_dsl_instances: 4096
+max_dsl_operations: 8000
+max_dsl_operations_per_component: 1024
+
+max_matrix_blocks_per_generation: 120000
+max_total_actions_per_generation: 120000
+max_sparse_segments_per_generation: 8000
+
+# Maximum attempts for the initial generation stage.
+# Retries cover both transient API failures and repairable invalid model outputs such as out-of-bounds coordinates.
+max_generation_attempts: 2
+max_repair_attempts: 1
+
+visual_review_enabled: true
+visual_review_min_occupied_blocks: 250
+visual_review_preview_size: 512
+
+# If the first compiled result is valid but the repair request fails, allow that first valid result to be applied.
+apply_best_effort_result: false
+
+# Request a repair pass for already-valid builds when validator warnings indicate poor structure or detail.
+# This does not require preview rendering unless visual_review_repair_enabled is also true.
+repair_warnings_enabled: true
+
+# Only request a repair pass for already-valid builds based on rendered preview review.
+visual_review_repair_enabled: false
+
+# When enabled, generated preview images are also copied into the debug directory.
+debug_artifacts_enabled: false
+debug_artifact_directory: plugins/CraftGPT/debug
+
+# Default compiled authoring prompt for Build Program DSL v2.
+# The planning and critique stages are injected by Java and do not need to be described here.
+# Variables:
+#   %WIDTH% %HEIGHT% %DEPTH%
+#   %WIDTH_MINUS_ONE% %HEIGHT_MINUS_ONE% %DEPTH_MINUS_ONE%
+#   %FOOTPRINT% %VOLUME%
+#   %MAX_OCCUPIED_BLOCKS%
+#   %MAX_DSL_COMPONENTS% %MAX_DSL_INSTANCES% %MAX_DSL_OPERATIONS% %MAX_OPERATIONS_PER_COMPONENT%
+#   %MINECRAFT_VERSION%
+#   %FRONT_DIRECTION%
+#   %X1% %Y1% %Z1% %X2% %Y2% %Z2%
+#   %SomeOtherVar%
+compiled_prompt: |
+  You design one Minecraft build inside a bounded local coordinate box.
+  Return only one minified Build Program DSL v2 JSON object.
+  Local coordinate contract:
+  - v must be 2
+  - o must be [0,0,0]
+  - X ranges from 0 to %WIDTH_MINUS_ONE%
+  - Y ranges from 0 to %HEIGHT_MINUS_ONE%
+  - Z ranges from 0 to %DEPTH_MINUS_ONE%
+  - Y is vertical
+  - X and Z are horizontal
+  - the front direction is %FRONT_DIRECTION%
+  Hard budgets:
+  - max occupied blocks: %MAX_OCCUPIED_BLOCKS%
+  - max components: %MAX_DSL_COMPONENTS%
+  - max instances: %MAX_DSL_INSTANCES%
+  - max total DSL operations: %MAX_DSL_OPERATIONS%
+  - max operations per component: %MAX_OPERATIONS_PER_COMPONENT%
+  - selection dimensions: %WIDTH% x %HEIGHT% x %DEPTH%
+  - footprint: %FOOTPRINT%
+  - volume: %VOLUME%
+  Minecraft version: %MINECRAFT_VERSION%
+  Use this exact DSL structure:
+  {
+    "v":2,
+    "o":[0,0,0],
+    "p":[{"i":"1","b":"minecraft:block_or_state"}],
+    "c":[{"n":"component_name","a":[operation,...]}],
+    "i":[{"c":"component_name","at":[x,y,z],"r":0,"mx":false,"mz":false}],
+    "a":[operation,...]
+  }
+  Compact repeated instances are allowed:
+  - linear repeat: {"c":"component_name","at":[x,y,z],"r":0,"mx":false,"mz":false,"s":[dx,dy,dz],"n":count}
+  - grid repeat: {"c":"component_name","at":[x,y,z],"r":0,"mx":false,"mz":false,"s":[dx,dy,dz],"n":count,"s2":[dx,dy,dz],"n2":count}
+  - n and n2 count placements including the base placement at at
+  Instance transform order:
+  - mirror local X
+  - mirror local Z
+  - rotate around the local Y axis by 0, 90, 180 or 270 degrees around the component origin
+  - translate by at
+  - repeated instance offsets are applied after the instance transform definition and before compilation of each placement
+  Components may contain only deterministic operations.
+  Do not nest or recurse component instances.
+  Available operations:
+  - box: {"k":"box","m":"add"|"cut","i":"1","f":[x,y,z],"t":[x,y,z],"ho":false,"wt":1}
+  - cyl: {"k":"cyl","m":"add","i":"1","c":[x,y,z],"r":radius,"h":height,"ax":"x"|"y"|"z","ho":false,"wt":1}
+  - ell: {"k":"ell","m":"add","i":"1","c":[x,y,z],"rx":rx,"ry":ry,"rz":rz,"ho":false,"wt":1}
+  - line: {"k":"line","m":"add","i":"1","f":[x,y,z],"t":[x,y,z],"w":thickness}
+  - pt: {"k":"pt","m":"add"|"cut","i":"1","at":[x,y,z]}
+  - pts: {"k":"pts","m":"add"|"cut","i":"1","ps":[[x,y,z],[x,y,z]]}
+  - prof: {"k":"prof","m":"add","i":"1","f":[x,y,z],"t":[x,y,z],"ax":"x"|"y"|"z","d":depth,"wt":1}
+  - seg: {"k":"seg","m":"add","i":"1","f":[x,y,z],"t":[x,y,z]}
+  For pt and pts in cut mode, omit i.
+  Always include every field shown in the operation shape you choose.
+  For hollow-capable primitives, always include ho and wt even when ho is false and wt is 1.
+  Primitive coordinate notes:
+  - for cyl, c is the center of the circular cross-section and the minimum coordinate on the cylinder axis
+  - for ell, c is the ellipsoid center
+  - for prof, f and t define the profile rectangle on a plane perpendicular to ax, and d extrudes in the positive axis direction
+  Rules:
+  1. valid JSON, supported blocks, valid bounds and safety budgets
+  2. semantic correctness, including required components, counts and arrangement
+  3. recognizable proportions, silhouettes, and complete side/rear elevations
+  4. coherent volumetric geometry with recesses, framing, supports, and layered depth
+  5. grounding, attachment and structural consistency
+  6. materials, trim and deliberate decorative detail
+  7. efficient use of reusable components plus exact point detailing where needed
+  Count and arrangement requirements are hard requirements.
+  Repeated structures should be defined once and instantiated.
+  Use compact repeated instances for rows or grids of windows, posts, beams, braces, shingles, railings, or sail elements when possible.
+  Symmetrical structures should be mirrored rather than independently approximated.
+  Detailed means deliberate geometry, trim, recesses, bevels and meaningful material transitions.
+  Detailed does not mean scattered blocks, random spikes or arbitrary palette variation.
+  Use pt and pts to finish crafted roof edges, trims, supports, machinery teeth, branch tips, terrain breakup, and other visible details that look too coarse as boxes alone.
+  Use stairs, slabs, walls, fences, trapdoors, panes, buttons, chains, lanterns, logs, and directional blocks when they improve silhouette and craftsmanship.
+  Large flat faces must be broken with framing, recesses, projections, trim, braces, supports, or material stepping.
+  Avoid monolithic boxy masses, blunt appendages, and thick solid crosses for blades or sails.
+  Prefer semantic primitives and component reuse over many raw seg cuboids. Use seg only for small irregular residue and use pt/pts for exact cleanup rather than bloating box counts.
+  All coordinates and endpoints are inclusive. Selection dimensions are not valid coordinates; the largest valid coordinate on each axis is exactly one less than the size on that axis.
+  Check final transformed extents, not only local component extents. Mirror, rotation, repeated-instance offsets, sails, eaves, and overhangs must still remain inside bounds.
+  When space allows, keep a one-block safety margin for outer decorative parts instead of pushing trim or appendages flush to the selection edge.
+  Simplify tiny details consistently when the selected resolution is too small.
+  Use the largest sensible scale without clipping or distorting the subject.
+  Use meaningful X, Y and Z extent for normal volumetric subjects.
+  Keep builds grounded or clearly attached unless the request says otherwise.
+  Do not output final sparse cuboid compression. Java performs the final compression.
+
+models:
+  gpt-5.6:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5.6"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 32000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "medium"
+
+  gpt-5.6-terra:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5.6-terra"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 30000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "medium"
+
+  gpt-5.6-luna:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5.6-luna"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 28000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "medium"
+
+  gpt-5-mini:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5-mini"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 24000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "medium"
+
+  gpt-5.4-mini:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5.4-mini"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 24000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "medium"
+
+  gpt-5.4-nano:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5.4-nano"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 18000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "low"
+
+  gpt-5-nano:
+    endpoint: https://api.openai.com/v1/responses
+    api_key: "${ENV:OPENAI_API_KEY}"
+    payload:
+      - model: "gpt-5-nano"
+      - instructions: "runtime-injected"
+      - input: "runtime-injected"
+      - store: false
+      - max_output_tokens: 18000
+      - text:
+          verbosity: "low"
+      - reasoning:
+          effort: "low"

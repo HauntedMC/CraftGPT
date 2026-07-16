@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support
+    url: https://www.hauntedmc.nl/support
+    about: Use support for setup, configuration, and usage help.
+  - name: Security Report
+    url: https://www.hauntedmc.nl/support
+    about: Report vulnerabilities privately and follow SECURITY.md guidance.

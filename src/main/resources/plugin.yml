@@ -1,0 +1,19 @@
+name: CraftGPT
+
+version: '${project.version}'
+description: Use AI to generate Minecraft builds.
+author: remymine
+main: nl.hauntedmc.craftgpt.CraftGPT
+
+api-version: '1.21'
+depend:
+  - WorldEdit
+commands:
+  craftgpt: {}
+
+permissions:
+  craftgpt.use:
+    description: Allows you to use CraftGPT generation commands
+  craftgpt.reload:
+    description: Allows you to reload the CraftGPT configuration
+    default: op

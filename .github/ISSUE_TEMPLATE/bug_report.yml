@@ -1,0 +1,123 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Please provide enough detail for maintainers to reproduce quickly.
+  - type: checkboxes
+    id: precheck
+    attributes:
+      label: Pre-check
+      options:
+        - label: I searched existing issues and discussions.
+          required: true
+        - label: I tested on the latest available release.
+          required: true
+        - label: I removed secrets and sensitive data from logs and config snippets.
+          required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+      placeholder: A short description of the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide minimal steps maintainers can follow.
+      placeholder: |
+        1. Configure ...
+        2. Start the server ...
+        3. Make a WorldEdit selection ...
+        4. Run /craftgpt ...
+        5. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: What should happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      placeholder: What actually happened?
+    validations:
+      required: true
+  - type: input
+    id: craftgpt_version
+    attributes:
+      label: CraftGPT Version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: paper_version
+    attributes:
+      label: Paper Version
+      placeholder: 1.21.11
+    validations:
+      required: true
+  - type: input
+    id: worldedit_version
+    attributes:
+      label: WorldEdit Version
+      placeholder: 7.3.18
+    validations:
+      required: true
+  - type: input
+    id: java_version
+    attributes:
+      label: Java Version
+      placeholder: "25"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - Generation pipeline
+        - Build DSL / parsing
+        - Validation / bounds enforcement
+        - Preview rendering
+        - WorldEdit integration
+        - Command handling
+        - Configuration / startup
+        - Build / CI
+        - Documentation
+        - Other / Not sure
+    validations:
+      required: true
+  - type: input
+    id: model_preset
+    attributes:
+      label: Model Preset (Optional)
+      placeholder: gpt-5-mini
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Stacktrace (Optional)
+      render: shell
+      description: Paste only the relevant part.
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional Context (Optional)
+      description: Config snippets, screenshots, prompts, or other helpful details.
+    validations:
+      required: false
