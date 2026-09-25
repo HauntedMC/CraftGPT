@@ -32,8 +32,8 @@ jobs:
           java-version: '25'
           cache: maven
           server-id: github
-          server-username: PACKAGES_USER
-          server-password: PACKAGES_TOKEN
+          server-username-env-var: PACKAGES_USER
+          server-password-env-var: PACKAGES_TOKEN
       - run: ./mvnw -U -B -ntp verify
       - run: bash scripts/verify-artifact.sh
       - name: Upload test and coverage reports
@@ -64,8 +64,8 @@ jobs:
           java-version: '25'
           cache: maven
           server-id: github
-          server-username: PACKAGES_USER
-          server-password: PACKAGES_TOKEN
+          server-username-env-var: PACKAGES_USER
+          server-password-env-var: PACKAGES_TOKEN
       - name: Run platform acceptance
         env:
           CRAFTGPT_ACCEPTANCE_WORK_DIRECTORY: ${{ runner.temp }}/craftgpt-acceptance

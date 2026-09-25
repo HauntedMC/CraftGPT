@@ -61,8 +61,8 @@ jobs:
           java-version: '25'
           cache: maven
           server-id: github
-          server-username: PACKAGES_USER
-          server-password: PACKAGES_TOKEN
+          server-username-env-var: PACKAGES_USER
+          server-password-env-var: PACKAGES_TOKEN
       - name: Require Maven package credentials
         run: test -n "$PACKAGES_USER" && test -n "$PACKAGES_TOKEN"
       - id: preflight
