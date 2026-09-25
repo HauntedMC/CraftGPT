@@ -1,0 +1,99 @@
+name: Release Package
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned release CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh extension install HauntedMC/gh-haunted-release --pin de43c102d81797001eef36fe45725744fdd22031
+      - id: version
+        name: Detect a reviewed version change
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: gh haunted-release gate
+
+  publish:
+    needs: gate
+    if: needs.gate.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      packages: write
+    env:
+      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME }}
+      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+      CRAFTGPT_ACCEPTANCE_KEEP_WORK_DIRECTORY: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned release CLI
+        run: gh extension install HauntedMC/gh-haunted-release --pin de43c102d81797001eef36fe45725744fdd22031
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          server-id: github
+          server-username: PACKAGES_USER
+          server-password: PACKAGES_TOKEN
+      - name: Require Maven package credentials
+        run: test -n "$PACKAGES_USER" && test -n "$PACKAGES_TOKEN"
+      - id: preflight
+        name: Inspect published Maven coordinates
+        run: gh haunted-release published-state "${{ needs.gate.outputs.version }}"
+      - name: Verify release candidate with platform acceptance
+        env:
+          CRAFTGPT_ACCEPTANCE_WORK_DIRECTORY: ${{ runner.temp }}/craftgpt-acceptance
+        run: ./mvnw -U -B -ntp -Prelease,platform-acceptance verify
+      - name: Audit distributable jar before publication
+        run: bash scripts/verify-artifact.sh
+      - name: Publish verified Maven package
+        if: steps.preflight.outputs.state != 'complete'
+        run: ./mvnw -B -ntp -DskipTests -Prelease deploy
+      - name: Resolve published Maven coordinates from a fresh repository
+        run: gh haunted-release verify-published "${{ needs.gate.outputs.version }}"
+      - name: Checksum distributable
+        run: |
+          cd target
+          artifact="CraftGPT-${{ needs.gate.outputs.version }}.jar"
+          sha256sum "$artifact" > "$artifact.sha256"
+          sha256sum --check "$artifact.sha256"
+      - name: Create release after package verification
+        run: |
+          gh release create "${{ needs.gate.outputs.tag }}" --target "$GITHUB_SHA" --title "CraftGPT ${{ needs.gate.outputs.tag }}" --generate-notes \
+            "target/CraftGPT-${{ needs.gate.outputs.version }}.jar" \
+            "target/CraftGPT-${{ needs.gate.outputs.version }}.jar.sha256"
+      - name: Upload acceptance logs on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-platform-acceptance-logs
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/craftgpt-acceptance/paper/paper.log

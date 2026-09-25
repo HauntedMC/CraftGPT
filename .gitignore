@@ -32,3 +32,7 @@ pom.xml.versionsBackup
 .m2repo/
 dump_code.py
 java_dump.txt
+
+# Maven and release tooling
+.flattened-pom.xml
+.mvn/timing.properties

@@ -13,7 +13,7 @@ Thanks for taking the time to contribute.
 ```bash
 git clone <repo-url>
 cd CraftGPT
-mvn -q -DskipTests compile
+./mvnw -B -ntp -DskipTests compile
 ```
 
 ## Contribution Workflow
@@ -29,14 +29,14 @@ mvn -q -DskipTests compile
 Minimum checks:
 
 ```bash
-mvn -q -DskipTests compile
-mvn -q test
+./mvnw -B -ntp -DskipTests compile
+./mvnw -B -ntp test
 ```
 
 Recommended before merge:
 
 ```bash
-mvn -B verify
+./mvnw -B -ntp verify
 ```
 
 ## Pull Request Expectations

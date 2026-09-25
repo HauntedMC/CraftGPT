@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <servers><server><id>github</id><username>${env.PACKAGES_USER}</username><password>${env.PACKAGES_TOKEN}</password></server></servers>
+  <profiles><profile><id>hauntedmc-github-packages</id>
+    <repositories><repository><id>central</id><url>https://repo.maven.apache.org/maven2</url></repository><repository><id>github</id><url>https://maven.pkg.github.com/hauntedmc/*</url><snapshots><enabled>true</enabled></snapshots></repository></repositories>
+    <pluginRepositories><pluginRepository><id>central</id><url>https://repo.maven.apache.org/maven2</url></pluginRepository><pluginRepository><id>github</id><url>https://maven.pkg.github.com/hauntedmc/*</url><snapshots><enabled>true</enabled></snapshots></pluginRepository></pluginRepositories>
+  </profile></profiles>
+  <activeProfiles><activeProfile>hauntedmc-github-packages</activeProfile></activeProfiles>
+</settings>

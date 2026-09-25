@@ -9,7 +9,6 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.block.BlockState;
 import nl.hauntedmc.craftgpt.CraftGPT;
 import nl.hauntedmc.craftgpt.generation.IntVec3;
-import nl.hauntedmc.craftgpt.generation.compiled.ResolvedPaletteEntry;
 import nl.hauntedmc.craftgpt.generation.compiled.SparseCuboid;
 import nl.hauntedmc.craftgpt.util.PluginConfig;
 import org.bukkit.Bukkit;

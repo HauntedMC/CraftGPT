@@ -261,3 +261,9 @@ Important config areas:
 - model preset endpoint, API key, and payload settings
 
 `/craftgpt reload` reloads both `config.yml` and `messages.yml`.
+
+## Installation and verification
+
+Use Java 25 and a compatible Paper server with WorldEdit installed. Copy `target/CraftGPT-<version>.jar` to the server's `plugins/` directory. Configure model credentials through environment variables such as `OPENAI_API_KEY`; the bundled `config.yml` keeps the `${ENV:OPENAI_API_KEY}` placeholder literal.
+
+Build and test with `./mvnw -B -ntp verify`, audit the jar with `bash scripts/verify-artifact.sh`, and run the offline Paper/WorldEdit startup check with `./mvnw -B -ntp -Pplatform-acceptance verify`. Release changes use `./tools/release/update-version patch --pr` from clean `main`; CI validates the PR, and a merged version change publishes the Maven package and GitHub release.
