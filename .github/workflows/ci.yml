@@ -1,29 +1,127 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
-      - master
   pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  tests:
+    name: Maven tests and artifact audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME || github.actor }}
+      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN || github.token }}
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Set up Java 25
-        uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: '25'
           cache: maven
+          server-id: github
+          server-username-env-var: PACKAGES_USER
+          server-password-env-var: PACKAGES_TOKEN
+      - run: ./mvnw -U -B -ntp verify
+      - run: bash scripts/verify-artifact.sh
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-and-coverage-reports
+          if-no-files-found: warn
+          path: |
+            target/surefire-reports
+            target/site/jacoco
 
-      - name: Build and test
-        run: mvn -B test package
+  platform-acceptance:
+    name: Paper platform acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME || github.actor }}
+      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN || github.token }}
+      CRAFTGPT_ACCEPTANCE_KEEP_WORK_DIRECTORY: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          server-id: github
+          server-username-env-var: PACKAGES_USER
+          server-password-env-var: PACKAGES_TOKEN
+      - name: Run platform acceptance
+        env:
+          CRAFTGPT_ACCEPTANCE_WORK_DIRECTORY: ${{ runner.temp }}/craftgpt-acceptance
+        run: ./mvnw -U -B -ntp -Pplatform-acceptance verify
+      - name: Upload acceptance logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: platform-acceptance-logs
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/craftgpt-acceptance/paper/paper.log
+
+  maven-policy:
+    name: Shared Maven policy
+    uses: HauntedMC/HauntedPlatform/.github/workflows/maven-ci.yml@10dfbacc8515208bf3b0ee236a8c7688fda49c9e # release hardening
+    with:
+      maven-command: ./mvnw -U -B -ntp validate
+    secrets:
+      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME || github.actor }}
+      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN || github.token }}
+
+  tooling:
+    name: ShellCheck and version tooling
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: |
+          mapfile -d '' scripts < <(git ls-files -z '*.sh')
+          shellcheck tools/release/update-version "${scripts[@]}"
+        shell: bash
+      - run: gh extension install HauntedMC/gh-haunted-release --pin de43c102d81797001eef36fe45725744fdd22031
+      - run: ./tools/release/update-version --dry-run patch
+
+  ci-required:
+    name: ci-required
+    if: ${{ always() }}
+    needs: [tests, platform-acceptance, maven-policy, tooling]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      CHECK_RESULTS: ${{ toJSON(needs) }}
+    steps:
+      - name: Require every validation job
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          import os
+          results = {name: job['result'] for name, job in json.loads(os.environ['CHECK_RESULTS']).items()}
+          failed = {name: result for name, result in results.items() if result != 'success'}
+          if failed:
+              raise SystemExit(f'Validation did not pass: {failed}')
+          PYTHON

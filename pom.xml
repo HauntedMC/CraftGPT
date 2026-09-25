@@ -1,113 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>nl.hauntedmc</groupId>
-  <artifactId>CraftGPT</artifactId>
-  <version>1.0.0</version>
-  <packaging>jar</packaging>
-
+  <parent>
+    <groupId>nl.hauntedmc.platform</groupId>
+    <artifactId>haunted-application-parent</artifactId>
+    <version>2.0.0</version>
+    <relativePath/>
+  </parent>
+  <groupId>nl.hauntedmc.craftgpt</groupId>
+  <artifactId>craftgpt</artifactId>
+  <version>${revision}</version>
   <name>CraftGPT</name>
-
+  <description>AI-assisted Minecraft building within WorldEdit selections.</description>
+  <url>https://github.com/HauntedMC/CraftGPT</url>
+  <inceptionYear>2026</inceptionYear>
+  <organization>
+    <name>HauntedMC</name>
+    <url>https://www.hauntedmc.nl</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>GNU Affero General Public License v3.0</name>
+      <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>HauntedMC</id>
+      <name>HauntedMC</name>
+      <url>https://www.hauntedmc.nl</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/HauntedMC/CraftGPT.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/HauntedMC/CraftGPT.git</developerConnection>
+    <url>https://github.com/HauntedMC/CraftGPT</url>
+    <tag>v1.0.2</tag>
+  </scm>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/HauntedMC/CraftGPT/issues</url>
+  </issueManagement>
+  <ciManagement>
+    <system>GitHub Actions</system>
+    <url>https://github.com/HauntedMC/CraftGPT/actions</url>
+  </ciManagement>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages - CraftGPT</name>
+      <url>https://maven.pkg.github.com/HauntedMC/CraftGPT</url>
+    </repository>
+  </distributionManagement>
   <properties>
-    <java.version>25</java.version>
+    <revision>1.0.2</revision>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.outputTimestamp>2026-09-25T00:00:00Z</project.build.outputTimestamp>
   </properties>
-
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+    <repository>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
+    </repository>
+    <repository>
+      <id>enginehub</id>
+      <url>https://maven.enginehub.org/repo/</url>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sk89q.worldedit</groupId>
+      <artifactId>worldedit-bukkit</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   <build>
+    <finalName>CraftGPT-${project.version}</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes><include>plugin.yml</include></includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes><exclude>plugin.yml</exclude></excludes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.16.0</version>
-        <configuration>
-          <release>${java.version}</release>
-          <showWarnings>true</showWarnings>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.6.0</version>
-        <configuration>
-          <useModulePath>false</useModulePath>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.2</version>
         <executions>
           <execution>
             <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
+            <goals><goal>shade</goal></goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/MANIFEST.MF</exclude>
-                  </excludes>
-                </filter>
-              </filters>
+              <artifactSet>
+                <includes><include>com.google.code.gson:gson</include></includes>
+              </artifactSet>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
   </build>
-
-  <repositories>
-
-
-      <repository>
-          <id>papermc-repo</id>
-          <url>https://repo.papermc.io/repository/maven-public/</url>
-      </repository>
-      <repository>
-          <id>enginehub-repo</id>
-          <url>https://maven.enginehub.org/repo/</url>
-      </repository>
-      <repository>
-          <id>sonatype</id>
-          <url>https://oss.sonatype.org/content/groups/public/</url>
-      </repository>
-  </repositories>
-
-  <dependencies>
-      <dependency>
-          <groupId>io.papermc.paper</groupId>
-          <artifactId>paper-api</artifactId>
-          <version>26.2.build.124-stable</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>2.14.0</version>
-      </dependency>
-      <dependency>
-          <groupId>com.sk89q.worldedit</groupId>
-          <artifactId>worldedit-bukkit</artifactId>
-          <version>7.4.5</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter</artifactId>
-          <version>6.1.3</version>
-          <scope>test</scope>
-      </dependency>
-  </dependencies>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build><plugins><plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions><execution><id>sources</id><goals><goal>jar-no-fork</goal></goals></execution></executions>
+      </plugin></plugins></build>
+    </profile>
+    <profile>
+      <id>platform-acceptance</id>
+      <build><plugins><plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions><execution>
+          <id>run-platform-acceptance</id>
+          <phase>verify</phase>
+          <goals><goal>exec</goal></goals>
+          <configuration>
+            <executable>bash</executable>
+            <arguments><argument>src/acceptance/run-acceptance.sh</argument></arguments>
+            <environmentVariables>
+              <CRAFTGPT_ARTIFACT>${project.build.directory}/${project.build.finalName}.jar</CRAFTGPT_ARTIFACT>
+              <CRAFTGPT_PAPER_VERSION>${haunted.paper.runtime.version}</CRAFTGPT_PAPER_VERSION>
+              <CRAFTGPT_PAPER_BUILD>${haunted.paper.runtime.build}</CRAFTGPT_PAPER_BUILD>
+              <CRAFTGPT_PAPER_SHA256>${haunted.paper.runtime.sha256}</CRAFTGPT_PAPER_SHA256>
+            </environmentVariables>
+          </configuration>
+        </execution></executions>
+      </plugin></plugins></build>
+    </profile>
+  </profiles>
 </project>

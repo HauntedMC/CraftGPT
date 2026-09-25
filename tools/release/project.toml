@@ -1,0 +1,12 @@
+[project]
+name = "CraftGPT"
+repository = "HauntedMC/CraftGPT"
+tool_version = "1.0.3"
+mode = "bump"
+prepare = "tools/release/prepare-version.sh"
+verify = ["./mvnw", "-B", "-ntp", "verify"]
+verify_before_pr = false
+
+[components.default]
+pom = "pom.xml"
+tag_prefix = "v"
