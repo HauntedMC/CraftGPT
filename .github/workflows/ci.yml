@@ -80,7 +80,7 @@ jobs:
 
   maven-policy:
     name: Shared Maven policy
-    uses: HauntedMC/HauntedPlatform/.github/workflows/maven-ci.yml@10dfbacc8515208bf3b0ee236a8c7688fda49c9e # release hardening
+    uses: HauntedMC/HauntedPlatform/.github/workflows/maven-ci.yml@043e5ca6059b1c2453500840c41d2cedba55bbc1 # release hardening
     with:
       maven-command: ./mvnw -U -B -ntp validate
     secrets:
