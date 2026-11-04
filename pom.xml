@@ -38,7 +38,7 @@
     <connection>scm:git:https://github.com/HauntedMC/CraftGPT.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/HauntedMC/CraftGPT.git</developerConnection>
     <url>https://github.com/HauntedMC/CraftGPT</url>
-    <tag>v1.0.2</tag>
+    <tag>v1.0.3</tag>
   </scm>
   <issueManagement>
     <system>GitHub</system>
@@ -56,9 +56,9 @@
     </repository>
   </distributionManagement>
   <properties>
-    <revision>1.0.2</revision>
+    <revision>1.0.3</revision>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.outputTimestamp>2026-09-25T00:00:00Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-11-04T00:00:00Z</project.build.outputTimestamp>
   </properties>
   <repositories>
     <repository>
