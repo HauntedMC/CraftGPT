@@ -49,8 +49,8 @@ mkdir -p "$work_directory/paper/plugins"
 paper_url="https://fill-data.papermc.io/v1/objects/$paper_sha256/paper-$paper_version-$paper_build.jar"
 curl --fail --silent --show-error --location --output "$work_directory/paper/paper.jar" "$paper_url"
 [[ "$(sha256sum "$work_directory/paper/paper.jar" | cut -d ' ' -f1)" == "$paper_sha256" ]] || fail 'Paper runtime checksum mismatch'
-worldedit_url="https://ci.enginehub.org/repository/download/bt10/29913:id/worldedit-bukkit-7.4.5-dist.jar?branch=version/7.4.x&guest=1"
-worldedit_sha256="e5696a6d064b9969437a8888be91b0941148a28e0c3736de1554a00254a5d142"
+worldedit_url="https://cdn.modrinth.com/data/1u6JkXh5/versions/YFnqiUlL/worldedit-bukkit-7.4.6.jar"
+worldedit_sha256="e0ce67d870ad1fef8a40dd9d7926360caf3bb44722438545d6b20b55f82a0c91"
 curl --fail --silent --show-error --location --output "$work_directory/paper/plugins/worldedit.jar" "$worldedit_url"
 [[ "$(sha256sum "$work_directory/paper/plugins/worldedit.jar" | cut -d ' ' -f1)" == "$worldedit_sha256" ]] || fail 'WorldEdit checksum mismatch'
 cp "$artifact" "$work_directory/paper/plugins/CraftGPT.jar"
