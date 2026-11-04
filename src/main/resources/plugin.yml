@@ -5,7 +5,7 @@ description: Use AI to generate Minecraft builds.
 author: remymine
 main: nl.hauntedmc.craftgpt.CraftGPT
 
-api-version: '1.21'
+api-version: '26.3'
 depend:
   - WorldEdit
 commands:
